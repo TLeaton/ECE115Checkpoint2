@@ -1,0 +1,52 @@
+#include <Adafruit_Sensor.h>  // libraries for BME280 sensor
+#include <Adafruit_BME280.h>
+
+Adafruit_BME280 bme;          // Define an object for the BME280 sensor
+
+// initialize alt with your current altitutde (in meters)
+float alt = 338;            
+float humidity, tempCelcius, pressPascal, tempFar, pressMillis, pressSeaLevel, pressSeaLevelHg;
+// declare variables to store measurements here
+
+void setup() {
+
+  bme.begin(0x76);            // initialize the BME280 sensor (I2C address is 0x76)
+  
+  // Begin serial communication at 9600 bits/second (function needed: Serial.begin() )
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  // read in climate values
+  tempCelcius = bme.readTemperature();
+  humidity = bme.readHumidity();
+  pressPascal = bme.readPressure();
+  
+  // make all necessary conversions ( function needed: pow( ) )
+  
+  //Converting to absolute sea level pressure
+  pressMillis = (pressPascal / 100.0);
+  pressSeaLevel = pressMillis / pow((1-(alt/44330.0)), 5.255);
+  pressSeaLevelHg = pressSeaLevel * 0.0295333727;
+  
+  //Celcius to Fahrenheit
+  tempFar = (((9.0/5.0) * tempCelcius)+ 32.0)  ;
+  
+  // print out all data to the serial monitor in the correct format ( functions needed: Serial.print(), Serial.println() )
+  Serial.print("-> Humidity: ");
+  Serial.print(humidity);
+  Serial.println(" %");
+
+  Serial.print("-> Temperature: ");
+  Serial.print(tempFar);
+  Serial.println("*F");
+
+  Serial.print("-> Sea-Level Pressure: ");
+  Serial.print(pressSeaLevelHg);
+  Serial.println("inHg");
+  Serial.println(" ");
+  
+  delay(3000);            // print out about once every 3 seconds
+  
+}
